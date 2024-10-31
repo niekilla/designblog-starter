@@ -45,7 +45,7 @@ require 'config.php';
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav ml-auto">
                         <li class="nav-item active">
-                            <a class="nav-link" href="index.html">Home</a>
+                            <a class="nav-link" href="index.php">Home</a>
                         </li>
                         <li class="nav-item dropdown @@category__active">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
@@ -53,8 +53,8 @@ require 'config.php';
                                 Categories <span class="fa fa-angle-down"></span>
                             </a>
                             <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <a class="dropdown-item @@cp__active" href="technology.html">Technology posts</a>
-                                <a class="dropdown-item @@ls__active" href="lifestyle.html">Lifestyle posts</a>
+                                <a class="dropdown-item @@cp__active" href="technology.php">Technology posts</a>
+                                <a class="dropdown-item @@ls__active" href="lifestyle.php">Lifestyle posts</a>
                             </div>
                         </li>
                         <li class="nav-item @@contact__active">
@@ -212,7 +212,11 @@ require 'config.php';
 
                     <?php
                     $trendingLimit = 4; // Jumlah artikel trending yang ditampilkan
-                    $query = "SELECT * FROM articles ORDER BY view_count DESC LIMIT $trendingLimit";
+                    $query = "SELECT articles.*, categories.name AS category_name, users.nama_users 
+          FROM articles 
+          JOIN categories ON articles.category_id = categories.category_id 
+          JOIN users ON articles.user_id = users.user_id 
+          ORDER BY created_at DESC LIMIT $trendingLimit";
                     $result = $conn->query($query);
 
                     if ($result->num_rows > 0) {
@@ -223,7 +227,7 @@ require 'config.php';
                             echo "<div class='blog-info'>";
                             echo "<a href='counter.php?id={$article['article_id']}' class='blog-desc1'>{$article['title']}</a>";
                             echo "<div class='author align-items-center mt-2 mb-1'>";
-                            echo "<a href='#author'>{$article['user_id']}</a> ";
+                            echo "<a href='#author'>{$article['nama_users']}</a> ";
                             echo "</div>";
                             echo "<ul class='blog-meta'>";
                             echo "<li class='meta-item blog-lesson'><span class='meta-value'>{$article['created_at']}</span></li>";
