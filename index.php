@@ -128,7 +128,7 @@ require 'config.php';
                     <div class="list-view">
                         <?php
                         // Batas artikel terbaru yang ditampilkan
-                        $limit = 3;
+                        $limit = 7;
                         $query = "SELECT * FROM articles ORDER BY created_at DESC LIMIT $limit";
                         $result = $conn->query($query);
 
