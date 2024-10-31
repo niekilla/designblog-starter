@@ -135,18 +135,22 @@ require 'config.php';
                         $offset = ($page - 1) * $limit;
 
                         // Query untuk artikel dengan limit dan offset
-                        $query = "SELECT * FROM articles ORDER BY created_at DESC LIMIT $limit OFFSET $offset";
+                        $query = "SELECT articles.*, categories.name AS category_name, users.nama_users 
+          FROM articles 
+          JOIN categories ON articles.category_id = categories.category_id 
+          JOIN users ON articles.user_id = users.user_id 
+          ORDER BY created_at DESC LIMIT $limit OFFSET $offset";
                         $result = $conn->query($query);
 
                         if ($result->num_rows > 0) {
                             while ($article = $result->fetch_assoc()) {
                                 echo "<div class='grids5-info img-block-mobile mt-5'>";
                                 echo "<div class='blog-info align-self'>";
-                                echo "<span class='category'>{$article['category_id']}</span>";
+                                echo "<span class='category'>{$article['category_name']}</span>";
                                 echo "<a href='counter.php?id={$article['article_id']}' class='blog-desc'>{$article['title']}</a>";
                                 echo "<p>{$article['content']}</p>";
                                 echo "<div class='author align-items-center mt-3 mb-1'>";
-                                echo "<a href='#author'>{$article['user_id']}</a>";
+                                echo "<a href='#author'>{$article['nama_users']}</a>";
                                 echo "</div>";
                                 echo "<ul class='blog-meta'>";
                                 echo "<li class='meta-item blog-lesson'>";
@@ -157,7 +161,7 @@ require 'config.php';
                                 echo "</li>";
                                 echo "</ul>";
                                 echo "</div>";
-                                echo "<a href='#blog-single' class='d-block zoom mt-md-0 mt-3'><img src='assets/images/{$article['image_url']}' alt='' class='img-fluid radius-image news-image'></a>";
+                                echo "<a href='#blog-single' class='d-block zoom mt-md-0 mt-3'><img src='assets/images/{$article['image']}' alt='' class='img-fluid radius-image news-image'></a>";
                                 echo "</div>";
                             }
                         } else {
