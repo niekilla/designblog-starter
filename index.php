@@ -128,8 +128,14 @@ require 'config.php';
                     <div class="list-view">
                         <?php
                         // Batas artikel terbaru yang ditampilkan
-                        $limit = 7;
-                        $query = "SELECT * FROM articles ORDER BY created_at DESC LIMIT $limit";
+                        $limit = 5;
+
+                        // Ambil halaman saat ini dari URL, jika tidak ada default ke halaman 1
+                        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+                        $offset = ($page - 1) * $limit;
+
+                        // Query untuk artikel dengan limit dan offset
+                        $query = "SELECT * FROM articles ORDER BY created_at DESC LIMIT $limit OFFSET $offset";
                         $result = $conn->query($query);
 
                         if ($result->num_rows > 0) {
@@ -137,7 +143,7 @@ require 'config.php';
                                 echo "<div class='grids5-info img-block-mobile mt-5'>";
                                 echo "<div class='blog-info align-self'>";
                                 echo "<span class='category'>{$article['category_id']}</span>";
-                                echo "<a href='#' class='blog-desc mt-0'>{$article['title']}</a>";
+                                echo "<a href='counter.php?id={$article['article_id']}' class='blog-desc'>{$article['title']}</a>";
                                 echo "<p>{$article['content']}</p>";
                                 echo "<div class='author align-items-center mt-3 mb-1'>";
                                 echo "<a href='#author'>{$article['user_id']}</a>";
@@ -164,49 +170,70 @@ require 'config.php';
                     <!-- pagination -->
                     <div class="pagination-wrapper mt-5">
                         <ul class="page-pagination">
-                            <li><a class="next" href="#url"><span class="fa fa-angle-left"></span></a></li>
-                            <li><span aria-current="page" class="page-numbers current">1</span></li>
-                            <li><a class="page-numbers" href="#url">2</a></li>
-                            <li><a class="page-numbers" href="#url">3</a></li>
-                            <li><a class="page-numbers" href="#url">....</a></li>
-                            <li><a class="page-numbers" href="#url">10</a></li>
-                            <li><a class="next" href="#url"><span class="fa fa-angle-right"></span></a></li>
+                            <?php
+                            // Hitung total halaman
+                            $resultTotal = $conn->query("SELECT COUNT(*) as total FROM articles");
+                            $rowTotal = $resultTotal->fetch_assoc();
+                            $totalArticles = $rowTotal['total'];
+                            $totalPages = ceil($totalArticles / $limit);
+
+                            // Tombol halaman sebelumnya
+                            if ($page > 1) {
+                                $prevPage = $page - 1;
+                                echo "<li><a class='prev' href='?page=$prevPage'><span class='fa fa-angle-left'></span></a></li>";
+                            }
+
+                            // Link ke halaman-halaman
+                            for ($i = 1; $i <= $totalPages; $i++) {
+                                if ($i == $page) {
+                                    echo "<li><span aria-current='page' class='page-numbers current'>$i</span></li>";
+                                } else {
+                                    echo "<li><a class='page-numbers' href='?page=$i'>$i</a></li>";
+                                }
+                            }
+
+                            // Tombol halaman berikutnya
+                            if ($page < $totalPages) {
+                                $nextPage = $page + 1;
+                                echo "<li><a class='next' href='?page=$nextPage'><span class='fa fa-angle-right'></span></a></li>";
+                            }
+                            ?>
                         </ul>
                     </div>
                     <!-- //pagination -->
                 </div>
                 <div class="col-lg-3 trending mt-lg-0 mt-5 mb-lg-5">
                 <div class="pos-sticky">
-    <h3 class="section-title-left">Trending</h3>
+                    <h3 class="section-title-left">Trending</h3>
 
-    <?php
-    $trendingLimit = 3; // Jumlah artikel trending yang ditampilkan
-    $query = "SELECT * FROM articles ORDER BY view_count DESC LIMIT $trendingLimit";
-    $result = $conn->query($query);
+                    <?php
+                    $trendingLimit = 4; // Jumlah artikel trending yang ditampilkan
+                    $query = "SELECT * FROM articles ORDER BY view_count DESC LIMIT $trendingLimit";
+                    $result = $conn->query($query);
 
-    if ($result->num_rows > 0) {
-        $index = 1;
-        while ($article = $result->fetch_assoc()) {
-            echo "<div class='grids5-info'>";
-            echo "<h4>" . str_pad($index, 2, '0', STR_PAD_LEFT) . ".</h4>";
-            echo "<div class='blog-info'>";
-            echo "<a href='#blog-single' class='blog-desc1'>{$article['title']}</a>";
-            echo "<div class='author align-items-center mt-2 mb-1'>";
-            echo "<a href='#author'>{$article['user_id']}</a> ";
-            echo "</div>";
-            echo "<ul class='blog-meta'>";
-            echo "<li class='meta-item blog-lesson'><span class='meta-value'>{$article['created_at']}</span></li>";
-            echo "<li class='meta-item blog-students'><span class='meta-value'> Dibaca: {$article['view_count']} read</span></li>";
-            echo "</ul>";
-            echo "</div>";
-            echo "</div>";
-            $index++;
-        }
-    } else {
-        echo "<p>Belum ada artikel trending.</p>";
-    }
-    ?>
-</div>
+                    if ($result->num_rows > 0) {
+                        $index = 1;
+                        while ($article = $result->fetch_assoc()) {
+                            echo "<div class='grids5-info'>";
+                            echo "<h4>" . str_pad($index, 2, '0', STR_PAD_LEFT) . ".</h4>";
+                            echo "<div class='blog-info'>";
+                            echo "<a href='counter.php?id={$article['article_id']}' class='blog-desc1'>{$article['title']}</a>";
+                            echo "<div class='author align-items-center mt-2 mb-1'>";
+                            echo "<a href='#author'>{$article['user_id']}</a> ";
+                            echo "</div>";
+                            echo "<ul class='blog-meta'>";
+                            echo "<li class='meta-item blog-lesson'><span class='meta-value'>{$article['created_at']}</span></li>";
+                            echo "<li class='meta-item blog-students'><span class='meta-value'> Dibaca: {$article['view_count']} read</span></li>";
+                            echo "</ul>";
+                            echo "</div>";
+                            echo "</div>";
+                            $index++;
+                        }
+                    } else {
+                        echo "<p>Belum ada artikel trending.</p>";
+                    }
+                    ?>
+                </div>
 
                 </div>
             </div>
